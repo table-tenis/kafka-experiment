@@ -1,5 +1,13 @@
 version: '3.5'
 
+networks:
+    LAN:
+        driver: bridge
+        ipam:
+            driver: default
+            config:
+                - subnet: 172.210.0.0/24
+
 services:
     zookeeper:
         image: confluentinc/cp-zookeeper:latest
@@ -32,6 +40,11 @@ services:
             CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
             CONFLUENT_METRICS_ENABLE: 'true'
             CONFLUENT_SUPPORT_CUSTOMER_ID: 'anonymous'
+
+        networks:
+            default:
+            LAN:
+                ipv4_address: 172.210.0.20
 
     schema-registry:
         image: confluentinc/cp-schema-registry
