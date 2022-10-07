@@ -1,16 +1,14 @@
-version: '3.5'
+version: '3.9'
 
-networks:
-    LAN:
-        driver: bridge
-        ipam:
-            driver: default
-            config:
-                - subnet: 172.210.0.0/24
+volumes:
+  zookeeper-data:
+  zookeeper-log:
+  kafka-data:
 
 services:
     zookeeper:
         image: confluentinc/cp-zookeeper:latest
+        user: root
         container_name: C1_zookeeper
         environment: 
             ZOOKEEPER_CLIENT_PORT: 2181
@@ -20,7 +18,10 @@ services:
 
     broker:
         image: confluentinc/cp-enterprise-kafka:latest
+        user: root
         container_name: C1_kafka
+        volumes:
+          - kafka-data:/var/lib/kafka/data:Z
         depends_on:
             - zookeeper
         ports: 
@@ -30,21 +31,20 @@ services:
             KAFKA_BROKER_ID: 1
             KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
             KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-            KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:29092,PLAINTEXT_HOST://localhost:9092
+            KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:29092,PLAINTEXT_HOST://172.21.100.154:9092
             KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
             KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
             KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
             KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
+            KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'false'
+            KAFKA_MESSAGE_MAX_BYTES: 10485880
+            KAFKA_REPLICA_FETCH_MAX_BYTES: 10485880
+            KAFKA_LOG_RETENTION_CHECK_INTERVAL_MS: 60000
             CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: broker:29092
             CONFLUENT_METRICS_REPORTER_ZOOKEEPER_CONNECT: zookeeper:2181
             CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
             CONFLUENT_METRICS_ENABLE: 'true'
             CONFLUENT_SUPPORT_CUSTOMER_ID: 'anonymous'
-
-        networks:
-            default:
-            LAN:
-                ipv4_address: 172.210.0.20
 
     schema-registry:
         image: confluentinc/cp-schema-registry
@@ -57,6 +57,7 @@ services:
         environment:
             SCHEMA_REGISTRY_HOST_NAME: schema-registry
             SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: 'zookeeper:2181'
+            SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'broker:29092'
 
     control-center:
         image: confluentinc/cp-enterprise-control-center:latest

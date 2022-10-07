@@ -3,7 +3,7 @@ from confluent_kafka.admin import AdminClient, NewTopic
 from confluent_kafka import KafkaException
 
 admin_client = AdminClient({
-    'bootstrap.servers': 'localhost:9092',
+    'bootstrap.servers': '172.21.100.154:9092',
 })
 
 topic_list = []

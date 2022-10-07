@@ -3,7 +3,7 @@ from time import sleep
 from json import dumps
 from confluent_kafka import Producer
 
-p = Producer({'bootstrap.servers': 'localhost:9092'})
+p = Producer({'bootstrap.servers': '172.21.100.154:9092'})
 
 def delivery_report(err, msg):
     """ Called once for each message produced to indicate delivery result.
@@ -21,7 +21,7 @@ for e in range(1000):
     # will be triggered from poll() above, or flush() below, when the message has
     # been successfully delivered or failed permanently.
     data = {'number': e}
-    p.produce('C1_example_topic', dumps(data).encode('utf-8'), callback=delivery_report)
+    p.produce('testtopic', dumps(data).encode('utf-8'), callback=delivery_report)
     sleep(5)
 
 # Wait for any outstanding messages to be delivered and delivery report

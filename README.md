@@ -18,4 +18,3 @@
   $ docker exec -ti -u root C1_kafka /bin/bash
   # yum install net-tools
   ```
- 
